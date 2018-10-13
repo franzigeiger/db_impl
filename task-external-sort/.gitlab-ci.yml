@@ -1,0 +1,81 @@
+# ---------------------------------------------------------------------------
+# MODERNDBS
+# ---------------------------------------------------------------------------
+
+stages:
+    - build
+    - test
+    - cleanup
+
+make:
+    stage: build
+    script: 
+        - mkdir -p build
+        - cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug ..
+        - make
+    cache:
+        key: "$CI_PIPELINE_ID"
+        paths:
+            - build/
+        policy: pull-push
+    tags:
+        - "clang-5.0"
+        - "cmake"
+        - "python3"
+
+tester:
+    stage: test
+    script:
+        - mkdir -p build
+        - cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug ..
+        - make
+        - ./tester --gtest_filter='-*Advanced*'
+    cache:
+        key: "$CI_PIPELINE_ID"
+        paths:
+            - build/
+        policy: pull
+    tags:
+        - "clang-5.0"
+        - "cmake"
+        - "python3"
+
+advanced_tester:
+    stage: test
+    script:
+        - mkdir -p build
+        - cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug ..
+        - make
+        - ./tester --gtest_filter='*Advanced*'
+    cache:
+        key: "$CI_PIPELINE_ID"
+        paths:
+            - build/
+        policy: pull
+    tags:
+        - "clang-5.0"
+        - "cmake"
+        - "python3"
+    allow_failure: true
+
+lint:
+    stage: test
+    script:
+        - mkdir -p build
+        - cd build
+        - cmake -DCMAKE_BUILD_TYPE=Debug ..
+        - make lint
+    cache:
+        key: "$CI_PIPELINE_ID"
+        paths:
+            - build/
+        policy: pull
+    tags:
+        - "clang-5.0"
+        - "clang-tidy-5.0"
+        - "cmake"
+        - "python3"
+    allow_failure: true
